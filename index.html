@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Markdown Preview</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+    }
+    #markdown-output {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Markdown Preview</h1>
+  <div id="markdown-output"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+  <script>
+    fetch('input.md')
+      .then(response => response.text())
+      .then(markdown => {
+        document.getElementById('markdown-output').innerHTML = marked.parse(markdown);
+        hljs.highlightAll();
+      });
+  </script>
+</body>
+</html>
