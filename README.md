@@ -1,19 +1,24 @@
 ## Overview
 
-This web application takes a Markdown file (input.md) and renders it as HTML within a designated div element (`#markdown-output`). It utilizes the `marked` library for Markdown parsing and `highlight.js` for syntax highlighting of code blocks.  It also provides a tabbed interface to switch between the rendered HTML and the original Markdown source.
+This web application takes a Markdown input and renders it as HTML within a designated div element (`#markdown-output`). It utilizes the `marked` library for Markdown parsing and `highlight.js` for syntax highlighting of code blocks. It provides a tabbed interface to switch between the rendered HTML and the original Markdown source. Additionally, it displays a live word count badge that updates after every render and formats numbers with Intl.NumberFormat.
 
 ## Setup
 
-1.  Ensure you have the `index.html` and `input.md` files in the same directory.
+1.  Ensure you have the `index.html` file.
 2.  No specific setup is required as it uses CDN links for external libraries.
 
 ## Usage
 
 1.  Open `index.html` in a web browser.
-2.  The content of `input.md` will be rendered as HTML inside the `#markdown-output` div.
-3.  Code blocks in `input.md` will be syntax highlighted.
+2.  The default Markdown content will be rendered as HTML inside the `#markdown-output` div.
+3.  Code blocks will be syntax highlighted.
 4.  Use the tabs to switch between the rendered HTML view and the raw Markdown source view.
+5.  The word count is displayed and automatically updates when the content changes.
 
 ## Improvements from Previous Version
 
-The primary enhancement is the addition of a tabbed interface.  Users can now easily switch between viewing the rendered HTML output and the original Markdown source code. This provides a convenient way to compare the original Markdown with its rendered output and inspect the underlying code. The content between tabs stays in sync.
+The primary enhancements include:
+
+1.  **Live Word Count:** A word count badge (`#markdown-word-count`) has been added.  It updates dynamically after each render, providing immediate feedback on the length of the Markdown content.
+2.  **Number Formatting:** The word count is formatted using `Intl.NumberFormat` for improved readability, especially for large documents.
+3.  **Code Clarity:** The JavaScript code has been refactored for better readability and maintainability.
