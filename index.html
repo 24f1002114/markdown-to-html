@@ -3,99 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Markdown Viewer</title>
+    <title>Markdown Previewer</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         body {
             font-family: sans-serif;
-            margin: 20px;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
         }
 
-        #markdown-container {
-            border: 1px solid #ccc;
-            padding: 10px;
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .tabs {
+            display: flex;
             margin-bottom: 20px;
         }
 
-        #markdown-tabs {
-            display: flex;
-            margin-bottom: 10px;
-        }
-
-        #markdown-tabs button {
-            padding: 8px 12px;
-            border: 1px solid #ccc;
-            background-color: #f0f0f0;
+        .tab {
+            padding: 10px 20px;
             cursor: pointer;
-        }
-
-        #markdown-tabs button.active {
             background-color: #ddd;
-        }
-
-        #markdown-output, #markdown-source {
             border: 1px solid #ccc;
-            padding: 10px;
-            display: none;
-            white-space: pre-wrap;
-            word-wrap: break-word;
+            border-radius: 5px 5px 0 0;
         }
 
-        #markdown-output.active, #markdown-source.active {
-            display: block;
+        .tab.active {
+            background-color: #fff;
+            border-bottom: none;
+        }
+
+        .content {
+            border: 1px solid #ccc;
+            padding: 20px;
+        }
+
+        #markdown-output {
+            white-space: pre-wrap; /* Important for keeping markdown formatting */
+        }
+
+        #markdown-source {
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+
+        #markdown-word-count {
+            font-size: 0.8em;
+            color: #777;
         }
     </style>
 </head>
 <body>
-
-    <div id="markdown-container">
-        <div id="markdown-tabs">
-            <button id="output-tab" class="active">Rendered HTML</button>
-            <button id="source-tab">Markdown Source</button>
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" data-tab="rendered">Rendered HTML</div>
+            <div class="tab" data-tab="source">Markdown Source</div>
+            <div id="markdown-word-count">Word Count: 0</div>
         </div>
-
-        <div id="markdown-output" class="active"></div>
-        <div id="markdown-source"></div>
+        <div id="rendered" class="content">
+            <div id="markdown-output"></div>
+        </div>
+        <div id="source" class="content" style="display: none;">
+            <pre><code id="markdown-source"></code></pre>
+        </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script>
-        const outputDiv = document.getElementById('markdown-output');
-        const sourceDiv = document.getElementById('markdown-source');
-        const outputTab = document.getElementById('output-tab');
-        const sourceTab = document.getElementById('source-tab');
+        const markdownInput = `
+# Hello, Markdown!
 
-        function loadMarkdown() {
-            fetch('input.md')
-                .then(response => response.text())
-                .then(markdown => {
-                    const html = marked.parse(markdown);
-                    outputDiv.innerHTML = html;
-                    sourceDiv.textContent = markdown;
+This is a basic Markdown example.
 
-                    document.querySelectorAll('pre code').forEach(el => {
-                        hljs.highlightElement(el);
-                    });
-                });
+## Features
+
+-   Lists
+-   **Bold text**
+-   *Italic text*
+
+\`\`\`javascript
+function greet() {
+    console.log("Hello, world!");
+}
+\`\`\`
+`;
+
+        const markdownOutput = document.getElementById('markdown-output');
+        const markdownSource = document.getElementById('markdown-source');
+        const renderedDiv = document.getElementById('rendered');
+        const sourceDiv = document.getElementById('source');
+        const tabs = document.querySelectorAll('.tab');
+        const wordCountElement = document.getElementById('markdown-word-count');
+
+        function renderMarkdown(markdown) {
+            marked.setOptions({
+                highlight: function(code, lang) {
+                    return hljs.highlight(code, { language: lang }).value;
+                },
+                pedantic: false,
+                gfm: true,
+                breaks: true,
+                sanitize: false,
+                smartLists: true,
+                xhtml: false,
+            });
+
+            const html = marked.parse(markdown);
+            markdownOutput.innerHTML = html;
+            markdownSource.textContent = markdown; // Set the markdown source
+
+            updateWordCount(markdown);
+
+            hljs.highlightAll();
         }
 
-        loadMarkdown();
+        function updateWordCount(markdown) {
+            const wordCount = markdown.split(/\s+/).filter(word => word !== '').length;
+            const numberFormat = new Intl.NumberFormat();
+            wordCountElement.textContent = `Word Count: ${numberFormat.format(wordCount)}`;
+        }
 
-        outputTab.addEventListener('click', () => {
-            outputDiv.classList.add('active');
-            sourceDiv.classList.remove('active');
-            outputTab.classList.add('active');
-            sourceTab.classList.remove('active');
+        function showTab(tabName) {
+            tabs.forEach(tab => tab.classList.remove('active'));
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+            renderedDiv.style.display = tabName === 'rendered' ? 'block' : 'none';
+            sourceDiv.style.display = tabName === 'source' ? 'block' : 'none';
+        }
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.dataset.tab;
+                showTab(tabName);
+            });
         });
 
-        sourceTab.addEventListener('click', () => {
-            outputDiv.classList.remove('active');
-            sourceDiv.classList.add('active');
-            outputTab.classList.remove('active');
-            sourceTab.classList.add('active');
-        });
+        renderMarkdown(markdownInput); // Initial render
+        showTab('rendered'); // Initial tab
     </script>
-
 </body>
 </html>
