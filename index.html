@@ -1,35 +1,101 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Markdown Preview</title>
-  <meta charset="UTF-8">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 20px;
-    }
-    #markdown-output {
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin-top: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Viewer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+        }
+
+        #markdown-container {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+
+        #markdown-tabs {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        #markdown-tabs button {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            background-color: #f0f0f0;
+            cursor: pointer;
+        }
+
+        #markdown-tabs button.active {
+            background-color: #ddd;
+        }
+
+        #markdown-output, #markdown-source {
+            border: 1px solid #ccc;
+            padding: 10px;
+            display: none;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        #markdown-output.active, #markdown-source.active {
+            display: block;
+        }
+    </style>
 </head>
 <body>
-  <h1>Markdown Preview</h1>
-  <div id="markdown-output"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <div id="markdown-container">
+        <div id="markdown-tabs">
+            <button id="output-tab" class="active">Rendered HTML</button>
+            <button id="source-tab">Markdown Source</button>
+        </div>
 
-  <script>
-    fetch('input.md')
-      .then(response => response.text())
-      .then(markdown => {
-        document.getElementById('markdown-output').innerHTML = marked.parse(markdown);
-        hljs.highlightAll();
-      });
-  </script>
+        <div id="markdown-output" class="active"></div>
+        <div id="markdown-source"></div>
+    </div>
+
+    <script>
+        const outputDiv = document.getElementById('markdown-output');
+        const sourceDiv = document.getElementById('markdown-source');
+        const outputTab = document.getElementById('output-tab');
+        const sourceTab = document.getElementById('source-tab');
+
+        function loadMarkdown() {
+            fetch('input.md')
+                .then(response => response.text())
+                .then(markdown => {
+                    const html = marked.parse(markdown);
+                    outputDiv.innerHTML = html;
+                    sourceDiv.textContent = markdown;
+
+                    document.querySelectorAll('pre code').forEach(el => {
+                        hljs.highlightElement(el);
+                    });
+                });
+        }
+
+        loadMarkdown();
+
+        outputTab.addEventListener('click', () => {
+            outputDiv.classList.add('active');
+            sourceDiv.classList.remove('active');
+            outputTab.classList.add('active');
+            sourceTab.classList.remove('active');
+        });
+
+        sourceTab.addEventListener('click', () => {
+            outputDiv.classList.remove('active');
+            sourceDiv.classList.add('active');
+            outputTab.classList.remove('active');
+            sourceTab.classList.add('active');
+        });
+    </script>
+
 </body>
 </html>
